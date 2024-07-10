@@ -32,30 +32,44 @@
     },
     methods: {
       joinBroadcast() {
+        console.log("'Join' нажат");
         this.initializeStreamingChannel();
-        this.initializeSignalOfferChannel(); // a private channel where the viewer listens to incoming signalling offer
+      
+       // a private channel where the viewer listens to incoming signalling offer
+        //console.log( this.initializeSignalOfferChannel());
+        this.initializeSignalOfferChannel();
       },
       initializeStreamingChannel() {
+        console.log("Поток инициирован");
+        
+        
         this.streamingPresenceChannel = window.Echo.join(
           `streaming-channel.${this.stream_id}`
         );
+        this.streamingPresenceChannel.here((users) => {
+          console.log('users');
+          console.log(users);
+          this.streamingUsers = users;
+        });
+        
+
       },
       createViewerPeer(incomingOffer, broadcaster) {
         const peer = new Peer({
           initiator: false,
           trickle: false,
-          config: {
-            iceServers: [
-              {
-                urls: "stun:stun.stunprotocol.org",
-              },
-              {
-                urls: this.turn_url,
-                username: this.turn_username,
-                credential: this.turn_credential,
-              },
-            ],
-          },
+          // config: {
+          //   iceServers: [
+          //     {
+          //       urls: "stun:stun.stunprotocol.org",
+          //     },
+          //     {
+          //       urls: this.turn_url,
+          //       username: this.turn_username,
+          //       credential: this.turn_credential,
+          //     },
+          //   ],
+          // },
         });
         // Add Transceivers
         peer.addTransceiver("video", { direction: "recvonly" });
@@ -71,6 +85,7 @@
       },
       handlePeerEvents(peer, incomingOffer, broadcaster, cleanupCallback) {
         peer.on("signal", (data) => {
+          console.log("signal", data);
           axios
             .post("/stream-answer", {
               broadcaster,
@@ -108,10 +123,11 @@
         peer.signal(updatedOffer);
       },
       initializeSignalOfferChannel() {
+        console.log('initializeSignalOfferChannel');
         window.Echo.private(`stream-signal-channel.${this.auth_user_id}`).listen(
           "StreamOffer",
           ({ data }) => {
-            console.log("Signal Offer from private channel");
+            console.log("Signal Offer from private channel", data.broadcaster);
             this.broadcasterId = data.broadcaster;
             this.createViewerPeer(data.offer, data.broadcaster);
           }

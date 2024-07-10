@@ -1896,7 +1896,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   props: ["auth_user_id", "env", "turn_url", "turn_username", "turn_credential"],
   data: function data() {
     return {
-      isVisibleLink: false,
+      isVisibleLink: true,
       streamingPresenceChannel: null,
       streamingUsers: [],
       currentlyContactedUser: null,
@@ -1909,6 +1909,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       // you can improve streamId generation code. As long as we include the
       // broadcaster's user id, we are assured of getting unique streamiing link everytime.
       // the current code just generates a fixed streaming link for a particular user.
+      console.log("streamId has done");
       return "".concat(this.auth_user_id, "12acde2");
     },
     streamLink: function streamLink() {
@@ -1916,6 +1917,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       if (this.env === "production") {
         return "https://laravel-video-call.herokuapp.com/streaming/".concat(this.streamId);
       } else {
+        console.log("streamLink has done");
         return "http://127.0.0.1:8000/streaming/".concat(this.streamId);
       }
     }
@@ -1930,10 +1932,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                // const stream = await navigator.mediaDevices.getUserMedia({
+                //   video: true, 
+                //   audio: true,
+                // });
+                // microphone and camera permissions
+                console.log('startStream');
+                _context.next = 3;
                 return (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.getPermissions)();
 
-              case 2:
+              case 3:
                 stream = _context.sent;
                 // ищем внешние устройства (микрофон и камеру)
                 _this.$refs.broadcaster.srcObject = stream;
@@ -1945,7 +1953,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.isVisibleLink = true;
 
-              case 7:
+              case 8:
               case "end":
                 return _context.stop();
             }
@@ -1954,31 +1962,34 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     peerCreator: function peerCreator(stream, user, signalCallback) {
-      var _this2 = this;
-
       var peer;
+      console.log('peerCreator');
       return {
         create: function create() {
           peer = new (simple_peer__WEBPACK_IMPORTED_MODULE_1___default())({
             initiator: true,
             trickle: false,
-            stream: stream,
-            config: {
-              iceServers: [{
-                urls: "stun:stun.stunprotocol.org"
-              }, {
-                urls: _this2.turn_url,
-                username: _this2.turn_username,
-                credential: _this2.turn_credential
-              }]
-            }
+            stream: stream // config: {
+            //   iceServers: [
+            //     {
+            //       urls: "stun:stun.stunprotocol.org",
+            //     },
+            //     {
+            //       urls: this.turn_url,
+            //       username: this.turn_username,
+            //       credential: this.turn_credential,
+            //     },
+            //   ],
+            // },
+
           });
+          console.log(peer);
         },
         getPeer: function getPeer() {
           return peer;
         },
         initEvents: function initEvents() {
-          console.log("qqa");
+          console.log("initEvents");
           peer.on("signal", function (data) {
             // send offer over here.
             signalCallback(data, user);
@@ -2002,58 +2013,66 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       };
     },
     initializeStreamingChannel: function initializeStreamingChannel() {
-      var _this3 = this;
+      var _this2 = this;
 
+      console.log("initializeStreamingChannel has done");
       this.streamingPresenceChannel = window.Echo.join("streaming-channel.".concat(this.streamId));
+      console.log("присоединение к каналу прошло успешно:");
       this.streamingPresenceChannel.here(function (users) {
-        _this3.streamingUsers = users;
+        console.log('users');
+        console.log(users);
+        _this2.streamingUsers = users;
       });
       this.streamingPresenceChannel.joining(function (user) {
         console.log("New User", user); // if this new user is not already on the call, send your stream offer
 
-        var joiningUserIndex = _this3.streamingUsers.findIndex(function (data) {
+        var joiningUserIndex = _this2.streamingUsers.findIndex(function (data) {
           return data.id === user.id;
         });
 
         if (joiningUserIndex < 0) {
-          _this3.streamingUsers.push(user); // A new user just joined the channel so signal that user
+          _this2.streamingUsers.push(user);
+
+          console.log("currentlyContactedUser:"); // A new user just joined the channel so signal that user
+
+          _this2.currentlyContactedUser = user.id;
+
+          _this2.$set(_this2.allPeers, "".concat(user.id), _this2.peerCreator(_this2.$refs.broadcaster.srcObject, user, _this2.signalCallback)); // Create Peer
 
 
-          _this3.currentlyContactedUser = user.id;
-
-          _this3.$set(_this3.allPeers, "".concat(user.id), _this3.peerCreator(_this3.$refs.broadcaster.srcObject, user, _this3.signalCallback)); // Create Peer
+          _this2.allPeers[user.id].create(); // Initialize Events
 
 
-          _this3.allPeers[user.id].create(); // Initialize Events
-
-
-          _this3.allPeers[user.id].initEvents();
+          _this2.allPeers[user.id].initEvents();
         }
       });
       this.streamingPresenceChannel.leaving(function (user) {
-        console.log(user.name, "Left"); // destroy peer
+        console.log(user.name, "Left");
+        console.log('Все пиры:'); //console.log(this.allPeers);
+        // destroy peer
 
-        _this3.allPeers[user.id].getPeer().destroy(); // delete peer object
+        _this2.allPeers[user.id].getPeer().destroy(); // delete peer object
 
 
-        delete _this3.allPeers[user.id]; // if one leaving is the broadcaster set streamingUsers to empty array
+        delete _this2.allPeers[user.id]; // if one leaving is the broadcaster set streamingUsers to empty array
 
-        if (user.id === _this3.auth_user_id) {
-          _this3.streamingUsers = [];
+        if (user.id === _this2.auth_user_id) {
+          _this2.streamingUsers = [];
         } else {
           // remove from streamingUsers array
-          var leavingUserIndex = _this3.streamingUsers.findIndex(function (data) {
+          var leavingUserIndex = _this2.streamingUsers.findIndex(function (data) {
             return data.id === user.id;
           });
 
-          _this3.streamingUsers.splice(leavingUserIndex, 1);
+          _this2.streamingUsers.splice(leavingUserIndex, 1);
         }
       });
     },
     initializeSignalAnswerChannel: function initializeSignalAnswerChannel() {
-      var _this4 = this;
+      var _this3 = this;
 
-      window.Echo["private"]("stream-signal-channel.".concat(this.auth_user_id)).listen("StreamAnswer", function (_ref) {
+      console.log("инициализация сигнала ответа по каналу");
+      var tt = window.Echo["private"]("stream-signal-channel.".concat(this.auth_user_id)).listen("StreamAnswer", function (_ref) {
         var data = _ref.data;
         console.log("Signal Answer from private channel");
 
@@ -2066,11 +2085,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             sdp: "".concat(data.answer.sdp, "\n")
           });
 
-          _this4.allPeers[_this4.currentlyContactedUser].getPeer().signal(updatedSignal);
+          _this3.allPeers[_this3.currentlyContactedUser].getPeer().signal(updatedSignal);
         }
-      });
+      }); //console.log(tt);
     },
     signalCallback: function signalCallback(offer, user) {
+      console.log("User!!", user);
       axios.post("/stream-offer", {
         broadcaster: this.auth_user_id,
         receiver: user,
@@ -2625,25 +2645,39 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   },
   methods: {
     joinBroadcast: function joinBroadcast() {
-      this.initializeStreamingChannel();
-      this.initializeSignalOfferChannel(); // a private channel where the viewer listens to incoming signalling offer
+      console.log("'Join' нажат");
+      this.initializeStreamingChannel(); // a private channel where the viewer listens to incoming signalling offer
+      //console.log( this.initializeSignalOfferChannel());
+
+      this.initializeSignalOfferChannel();
     },
     initializeStreamingChannel: function initializeStreamingChannel() {
+      var _this = this;
+
+      console.log("Поток инициирован");
       this.streamingPresenceChannel = window.Echo.join("streaming-channel.".concat(this.stream_id));
+      this.streamingPresenceChannel.here(function (users) {
+        console.log('users');
+        console.log(users);
+        _this.streamingUsers = users;
+      });
     },
     createViewerPeer: function createViewerPeer(incomingOffer, broadcaster) {
       var peer = new (simple_peer__WEBPACK_IMPORTED_MODULE_0___default())({
         initiator: false,
-        trickle: false,
-        config: {
-          iceServers: [{
-            urls: "stun:stun.stunprotocol.org"
-          }, {
-            urls: this.turn_url,
-            username: this.turn_username,
-            credential: this.turn_credential
-          }]
-        }
+        trickle: false // config: {
+        //   iceServers: [
+        //     {
+        //       urls: "stun:stun.stunprotocol.org",
+        //     },
+        //     {
+        //       urls: this.turn_url,
+        //       username: this.turn_username,
+        //       credential: this.turn_credential,
+        //     },
+        //   ],
+        // },
+
       }); // Add Transceivers
 
       peer.addTransceiver("video", {
@@ -2657,9 +2691,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.broadcasterPeer = peer;
     },
     handlePeerEvents: function handlePeerEvents(peer, incomingOffer, broadcaster, cleanupCallback) {
-      var _this = this;
+      var _this2 = this;
 
       peer.on("signal", function (data) {
+        console.log("signal", data);
         axios.post("/stream-answer", {
           broadcaster: broadcaster,
           answer: data
@@ -2671,7 +2706,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
       peer.on("stream", function (stream) {
         // display remote stream
-        _this.$refs.viewer.srcObject = stream;
+        _this2.$refs.viewer.srcObject = stream;
       });
       peer.on("track", function (track, stream) {
         console.log("onTrack");
@@ -2695,14 +2730,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       peer.signal(updatedOffer);
     },
     initializeSignalOfferChannel: function initializeSignalOfferChannel() {
-      var _this2 = this;
+      var _this3 = this;
 
+      console.log('initializeSignalOfferChannel');
       window.Echo["private"]("stream-signal-channel.".concat(this.auth_user_id)).listen("StreamOffer", function (_ref) {
         var data = _ref.data;
-        console.log("Signal Offer from private channel");
-        _this2.broadcasterId = data.broadcaster;
+        console.log("Signal Offer from private channel", data.broadcaster);
+        _this3.broadcasterId = data.broadcaster;
 
-        _this2.createViewerPeer(data.offer, data.broadcaster);
+        _this3.createViewerPeer(data.offer, data.broadcaster);
       });
     },
     removeBroadcastVideo: function removeBroadcastVideo() {
@@ -2820,9 +2856,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var getPermissions = function getPermissions() {
   // Older browsers might not implement mediaDevices at all, so we set an empty object first
+  console.log("navigator.mediaDevices:");
+  console.log(navigator.mediaDevices);
+
   if (navigator.mediaDevices === undefined) {
     navigator.mediaDevices = {};
-    console.log('111');
   } // Some browsers partially implement media devices. We can't just assign an object
   // with getUserMedia as it would overwrite existing properties.
   // Here, we will just add the getUserMedia property if it's missing.
@@ -2857,6 +2895,7 @@ var getPermissions = function getPermissions() {
       reject(err); //   throw new Error(`Unable to fetch stream ${err}`);
     });
   });
+  console.log("Promise in 'q':");
   console.log(q);
   return q;
 };

@@ -1,8 +1,9 @@
 export const getPermissions = () => {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
+    console.log("navigator.mediaDevices:");
+    console.log(navigator.mediaDevices);
     if (navigator.mediaDevices === undefined) {
         navigator.mediaDevices = {};
-        console.log('111');
     }
     
 
@@ -48,6 +49,7 @@ export const getPermissions = () => {
                 //   throw new Error(`Unable to fetch stream ${err}`);
             });
         });
+    console.log("Promise in 'q':")
     console.log(q);
     return q;
 };

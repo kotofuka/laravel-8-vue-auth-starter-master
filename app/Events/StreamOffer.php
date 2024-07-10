@@ -7,6 +7,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class StreamOffer implements ShouldBroadcast
 {
@@ -31,6 +32,7 @@ class StreamOffer implements ShouldBroadcast
     public function broadcastOn()
     {
         // stream offer can broadcast on a private channel
+        Log::info('broadcastOn StreamOffer');
         return  new PrivateChannel('stream-signal-channel.' . $this->data['receiver']['id']);
     }
 }

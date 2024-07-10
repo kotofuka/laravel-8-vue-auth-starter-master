@@ -28,7 +28,7 @@
     ],
     data() {
       return {
-        isVisibleLink: false,
+        isVisibleLink: true,
         streamingPresenceChannel: null,
         streamingUsers: [],
         currentlyContactedUser: null,
@@ -40,6 +40,7 @@
         // you can improve streamId generation code. As long as we include the
         // broadcaster's user id, we are assured of getting unique streamiing link everytime.
         // the current code just generates a fixed streaming link for a particular user.
+        console.log("streamId has done");
         return `${this.auth_user_id}12acde2`;
       },
       streamLink() {
@@ -47,6 +48,7 @@
         if (this.env === "production") {
           return `https://laravel-video-call.herokuapp.com/streaming/${this.streamId}`;
         } else {
+          console.log("streamLink has done");
           return `http://127.0.0.1:8000/streaming/${this.streamId}`;
         }
       },
@@ -58,39 +60,46 @@
         //   audio: true,
         // });
         // microphone and camera permissions
+        console.log('startStream');
         
         const stream = await getPermissions(); // ищем внешние устройства (микрофон и камеру)
-        
         this.$refs.broadcaster.srcObject = stream;
+
+
         this.initializeStreamingChannel();
+        
         this.initializeSignalAnswerChannel(); // a private channel where the broadcaster listens to incoming signalling answer
+        
         this.isVisibleLink = true;
       },
       peerCreator(stream, user, signalCallback) {
         let peer;
+        console.log('peerCreator');
+        
         return {
           create: () => {
             peer = new Peer({
               initiator: true,
               trickle: false,
               stream: stream,
-              config: {
-                iceServers: [
-                  {
-                    urls: "stun:stun.stunprotocol.org",
-                  },
-                  {
-                    urls: this.turn_url,
-                    username: this.turn_username,
-                    credential: this.turn_credential,
-                  },
-                ],
-              },
+              // config: {
+              //   iceServers: [
+              //     {
+              //       urls: "stun:stun.stunprotocol.org",
+              //     },
+              //     {
+              //       urls: this.turn_url,
+              //       username: this.turn_username,
+              //       credential: this.turn_credential,
+              //     },
+              //   ],
+              // },
             });
+            console.log(peer);
           },
           getPeer: () => peer,
           initEvents: () => {
-            console.log("qqa");
+            console.log("initEvents");
             peer.on("signal", (data) => {
               // send offer over here.
               signalCallback(data, user);
@@ -114,10 +123,16 @@
         };
       },
       initializeStreamingChannel() {
+        console.log("initializeStreamingChannel has done");
+
         this.streamingPresenceChannel = window.Echo.join(
           `streaming-channel.${this.streamId}`
         );
+        console.log("присоединение к каналу прошло успешно:");
+        
         this.streamingPresenceChannel.here((users) => {
+          console.log('users');
+          console.log(users);
           this.streamingUsers = users;
         });
         this.streamingPresenceChannel.joining((user) => {
@@ -127,7 +142,10 @@
             (data) => data.id === user.id
           );
           if (joiningUserIndex < 0) {
+            
             this.streamingUsers.push(user);
+            
+            console.log("currentlyContactedUser:");
             // A new user just joined the channel so signal that user
             this.currentlyContactedUser = user.id;
             this.$set(
@@ -145,8 +163,12 @@
             this.allPeers[user.id].initEvents();
           }
         });
+        
+     
         this.streamingPresenceChannel.leaving((user) => {
           console.log(user.name, "Left");
+          console.log('Все пиры:');
+          //console.log(this.allPeers);
           // destroy peer
           this.allPeers[user.id].getPeer().destroy();
           // delete peer object
@@ -164,9 +186,12 @@
         });
       },
       initializeSignalAnswerChannel() {
-        window.Echo.private(`stream-signal-channel.${this.auth_user_id}`).listen(
+        console.log("инициализация сигнала ответа по каналу");
+       
+        let tt=window.Echo.private(`stream-signal-channel.${this.auth_user_id}`).listen(
           "StreamAnswer",
           ({ data }) => {
+
             console.log("Signal Answer from private channel");
             if (data.answer.renegotiate) {
               console.log("renegotating");
@@ -182,8 +207,10 @@
             }
           }
         );
+        //console.log(tt);
       },
       signalCallback(offer, user) {
+        console.log("User!!", user);
         axios
           .post("/stream-offer", {
             broadcaster: this.auth_user_id,
