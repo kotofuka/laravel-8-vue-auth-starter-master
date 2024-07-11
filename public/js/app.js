@@ -2699,7 +2699,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           broadcaster: broadcaster,
           answer: data
         }).then(function (res) {
-          console.log(res);
+          console.log("res: ", res);
         })["catch"](function (err) {
           console.log(err);
         });
@@ -2728,6 +2728,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
 
       peer.signal(updatedOffer);
+      console.log("updatedOffer");
+      console.log(updatedOffer);
     },
     initializeSignalOfferChannel: function initializeSignalOfferChannel() {
       var _this3 = this;

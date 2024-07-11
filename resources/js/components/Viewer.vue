@@ -92,7 +92,7 @@
               answer: data,
             })
             .then((res) => {
-              console.log(res);
+              console.log("res: ", res);
             })
             .catch((err) => {
               console.log(err);
@@ -121,6 +121,8 @@
           sdp: `${incomingOffer.sdp}\n`,
         };
         peer.signal(updatedOffer);
+        console.log("updatedOffer");
+        console.log(updatedOffer);
       },
       initializeSignalOfferChannel() {
         console.log('initializeSignalOfferChannel');

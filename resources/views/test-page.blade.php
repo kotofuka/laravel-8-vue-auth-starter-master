@@ -10,19 +10,18 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/test_js.js') }}" defer></script>
+    <script src="{{ asset('js/test.js') }}"></script>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="{{ asset('css/test_css.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
-        <nav class="navbar">
-
-        </nav>
+    <h1>Страница для перевода звука в текст</h1>
+    <div id = "text1" style="display: inline-block">
+        <p>Данная страница служит для перевода звука в текст. Чтобы записать звук нажмите на кнопку <strong><i>Начать запись</i></strong>. 
+            Для остановки нажмите на кнопку <strong><i>Остановить запись</i></strong>. 
+            После остановки записи вы можете конвертировать звук в текст, нажав на кнопку <strong><i>Преобразовать звук в текст</i></strong></p>
     </div>
+    <input type="button" id="start_button" value="начать запись" onclick="StartRecord()">
+    <input type="button" id="pause_button" value="остановить запись" onclick="PauseRecord()">
+    <input type="button" id="stop_button" value="закончить запись" onclick="StopRecord()">
 </body>
+</html>

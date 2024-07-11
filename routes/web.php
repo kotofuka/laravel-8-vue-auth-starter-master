@@ -39,4 +39,4 @@ Route::post('/stream-offer', 'App\Http\Controllers\WebrtcStreamingController@mak
 Route::post('/stream-answer', 'App\Http\Controllers\WebrtcStreamingController@makeStreamAnswer');
 
 // тестовые пути
-Route::post('/test', 'App\Http\Controllers\WebRTCTest@index');
+Route::get('/test-page', 'App\Http\Controllers\WebRTCTest@index');
