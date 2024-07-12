@@ -1,10 +1,5 @@
 // imports
 
-
-// global vars
-var localStream = null;
-var streamConstraints = {"audio": true};
-
 //functions
 // testing stand number 1
 // function StartRecord(){ // альтернативное название "getUserMerdia_click"
@@ -61,12 +56,26 @@ navigator.mediaDevices.getUserMedia({audio:true})
         rec.ondataavailable = e => {
             console.log("e:", e);
             audioChunks.push(e.data);
+            console.log("type: ", typeof(e))
             if (rec.state == "inactive"){
                console.log("завершенный файл", e.data);
-               var blobUrl = URL.createObjectURL(e.data);
-               var link = document.createElement("a");
-               link.href = blobUrl;
-               link.download = "aDefaultFileName.webm";
+            //    let response = fetch('/convert', {
+            //     method: "post",
+            //     body: e
+            //    }).catch(function(e){
+            //     console.log("error: " + e);
+            //    });
+               //console.log("fetch was done");
+
+                axios({
+                    method: "post",
+                    url: "/convert",
+                    data: {
+                        data: e
+                    }
+                });
+
+               //var blob = response.blob;
             }
         }
     })
@@ -88,4 +97,6 @@ function PauseRecord(){
     console.log("PauseRecord");
     rec.pause();
 }
+
+
 // other

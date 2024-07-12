@@ -40,3 +40,4 @@ Route::post('/stream-answer', 'App\Http\Controllers\WebrtcStreamingController@ma
 
 // тестовые пути
 Route::get('/test-page', 'App\Http\Controllers\WebRTCTest@index');
+Route::post('/convert', "App\Http\Controllers\ConvertController@convertWebmToWav" );

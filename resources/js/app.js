@@ -5,6 +5,7 @@
  */
 
 require('./bootstrap');
+import Vue from 'vue';
 
 window.Vue = require('vue').default;
 
@@ -23,6 +24,7 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 Vue.component("broadcaster", require("./components/Broadcaster.vue").default);
 Vue.component("viewer", require("./components/Viewer.vue").default);
 Vue.component("video-chat", require("./components/VideoChat.vue").default);
+Vue.component('test-page', require('./components/Test.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
