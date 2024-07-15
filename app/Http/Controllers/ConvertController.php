@@ -14,9 +14,7 @@ class ConvertController extends Controller
             'ffprobe.binaries' => 'C:\FFmpeg\ffprobe.exe'
         ]);
         Log::info("convert");
-        var_dump($_GET);
-        $data = $_GET;
-        Log::info(($_GET));
+        
         //return;
     }
 }

@@ -81,22 +81,4 @@ navigator.mediaDevices.getUserMedia({audio:true})
     })
     .catch(e=>console.log(e));
 
-function StartRecord(){
-    console.log("StartRecord");
-    rec.start();
-}
-
-function StopRecord(){
-    console.log("StopRecord");
-    rec.stop();
-    console.log("audioChunks:", audioChunks);
-
-}
-
-function PauseRecord(){
-    console.log("PauseRecord");
-    rec.pause();
-}
-
-
 // other

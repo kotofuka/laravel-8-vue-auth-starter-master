@@ -10,7 +10,7 @@
 
 </head>
 <body>
-    <div id='app'>
+    <div id='test-app'>
         <main class="py-4">
             @yield('content')
         </main>
@@ -21,6 +21,7 @@
                 После остановки записи вы можете конвертировать звук в текст, нажав на кнопку <strong><i>Преобразовать звук в текст</i></strong></p>
         </div>
     </div>
+    {{-- <script src="{{ asset('js/test.js') }}"></script> --}}
     <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

@@ -1,76 +1,120 @@
 <template>
-
-<div class="container">
-    <button @click="StartRecord">Начать запись</button>
-    <!-- <input type="button" id="start_button" value="начать запись" onclick="StartRecord">
-    <input type="button" id="pause_button" value="остановить запись" onclick="PauseRecord">
-    <input type="button" id="stop_button" value="закончить запись" onclick="StopRecord">
-    <a download="aDefaultNameFile.webm" href="#" id="link">загрузить</a> -->
-
-</div>
-
-    
+    <div class="container">
+        <button @click="setup">Начать работу</button>
+        <button @click="startRecord">Начать запись</button>
+        <button @click="pauseRecord">Приостановить запись</button>
+        <button @click="stopRecord">Завершить запись</button>
+    </div>
 </template>
 
 <script>
+
+import Vue from "vue"
+
 export default {
+    // props: {
+    //     record: {type: MediaRecorder | null, default: null}
+    // },
+    // data: function(){
+    //     return {
+    //         record: this.record,
+    //     }
+    // },
     methods: {
-        StartRecord(){
-            console.log("StartRecord");
-            this.rec.start();
+        startRecord: function(){
+            console.log("Start operation");
+            this.record.start();
         },
 
-        StopRecord(){
-            console.log("StopRecord");
-            rec.stop();
-            console.log("audioChunks:", audioChunks);
-
+        stopRecord: function(){
+            console.log("Stop operation");
+            this.record.stop();
         },
 
-        PauseRecord(){
-            console.log("PauseRecord");
-            rec.pause();
-        }
-    },
+        pauseRecord: function(){
+            console.log("Pause operation");
+            this.record.pause();
+        },
 
-    setup() {
-        var audioChunks = [];
-        //var rec;
-        console.log("setup()");
-        navigator.mediaDevices.getUserMedia({audio:true})
-            .then(stream => {
-                console.log("getUserMedia_success, stream", stream);
-                let rec = new MediaRecorder(stream);
-                console.log("MediaRecorder:", rec);
-                rec.ondataavailable = e => {
-                    console.log("e:", e);
-                    audioChunks.push(e.data);
-                    console.log("type: ", typeof(e))
-                    if (rec.state == "inactive"){
-                    console.log("завершенный файл", e.data);
-                    //    let response = fetch('/convert', {
-                    //     method: "post",
-                    //     body: e
-                    //    }).catch(function(e){
-                    //     console.log("error: " + e);
-                    //    });
-                    //console.log("fetch was done");
+        setup: function(){
+            var audioChunks = [];
+            //var rec;
+            navigator.mediaDevices.getUserMedia({audio:true})
+                .then(stream => {
+                    console.log("getUserMedia_success, stream", stream);
+                    this.record = new MediaRecorder(stream);
+                    console.log("MediaRecorder:", this.record);
+                    this.record.ondataavailable = e => {
+                        console.log("e:", e);
+                        audioChunks.push(e.data);
+                        console.log("type: ", typeof(e))
+                        if (this.record.state == "inactive"){
+                            console.log("завершенный файл", e.data);
+                            //    let response = fetch('/convert', {
+                                //     method: "post",
+                                //     body: e
+                            //    }).catch(function(e){
+                                //     console.log("error: " + e);
+                            //    });
+                            //console.log("fetch was done");
 
-                        // axios({
-                        //     method: "post",
-                        //     url: "/convert",
-                        //     data: {
-                        //         data: e
-                        //     }
-                        // });
+                            axios({
+                                method: "post",
+                                url: "/convert",
+                                data: {
+                                    data: e
+                                }
+                            });
 
-                    //var blob = response.blob;
+                        
+                            //var blob = response.blob;
+                            
+                        }
                     }
-                }
-            })
-            .catch(e=>console.log(e));
+                })
+                .catch(e=>console.log(e));
+        
+        },
     }
 }
 
+    // var audioChunks = [];
+    // //var rec;
+    // navigator.mediaDevices.getUserMedia({audio:true})
+    //     .then(stream => {
+    //         console.log("getUserMedia_success, stream", stream);
+    //         this.record = new MediaRecorder(stream);
+    //         console.log("MediaRecorder:", this.record);
+    //         this.record.ondataavailable = e => {
+    //             console.log("e:", e);
+    //             audioChunks.push(e.data);
+    //             console.log("type: ", typeof(e))
+    //             if (this.record.state == "inactive"){
+    //             console.log("завершенный файл", e.data);
+    //             //    let response = fetch('/convert', {
+    //             //     method: "post",
+    //             //     body: e
+    //             //    }).catch(function(e){
+    //             //     console.log("error: " + e);
+    //             //    });
+    //             //console.log("fetch was done");
+
+    //                 // axios({
+    //                 //     method: "post",
+    //                 //     url: "/convert",
+    //                 //     data: {
+    //                 //         data: e
+    //                 //     }
+    //                 // });
+
+    //             //var blob = response.blob;
+    //             }
+    //         }
+    //     })
+    //     .catch(e=>console.log(e));
+
+
+
     
+
 </script>
