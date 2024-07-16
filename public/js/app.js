@@ -2380,6 +2380,7 @@ __webpack_require__.r(__webpack_exports__);
       b.lastModifiedDate = new Date();
       return blob;
     },
+    // точка входа
     setup: function setup() {
       var _this = this;
       var audioChunks = [];

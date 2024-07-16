@@ -43,7 +43,8 @@ export default {
             b.lastModifiedDate = new Date();
             return blob;
         },
-
+        
+        // точка входа
         setup: function(){
             var audioChunks = [];
             //var rec;
