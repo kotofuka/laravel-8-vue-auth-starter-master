@@ -9,6 +9,7 @@
 
 <script>
 
+import axios from "axios";
 import Vue from "vue"
 
 export default {
@@ -36,6 +37,13 @@ export default {
             this.record.pause();
         },
 
+        blobToFile(blob, fileName){
+            let b = blob;
+            b.name = fileName;
+            b.lastModifiedDate = new Date();
+            return blob;
+        },
+
         setup: function(){
             var audioChunks = [];
             //var rec;
@@ -47,28 +55,17 @@ export default {
                     this.record.ondataavailable = e => {
                         console.log("e:", e);
                         audioChunks.push(e.data);
-                        console.log("type: ", typeof(e))
+                        //console.log("type:", typeof(e))
                         if (this.record.state == "inactive"){
                             console.log("завершенный файл", e.data);
-                            //    let response = fetch('/convert', {
-                                //     method: "post",
-                                //     body: e
-                            //    }).catch(function(e){
-                                //     console.log("error: " + e);
-                            //    });
-                            //console.log("fetch was done");
-
-                            axios({
-                                method: "post",
-                                url: "/convert",
-                                data: {
-                                    data: e
-                                }
+ 
+                            let formData = new FormData();
+                            formData.append("voice", e.data);
+                            return axios.post("/convert", formData, {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                },
                             });
-
-                        
-                            //var blob = response.blob;
-                            
                         }
                     }
                 })

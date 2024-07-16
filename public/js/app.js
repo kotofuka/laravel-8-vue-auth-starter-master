@@ -2338,7 +2338,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
@@ -2348,6 +2349,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
 //
 //
 //
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -2372,6 +2374,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       console.log("Pause operation");
       this.record.pause();
     },
+    blobToFile: function blobToFile(blob, fileName) {
+      var b = blob;
+      b.name = fileName;
+      b.lastModifiedDate = new Date();
+      return blob;
+    },
     setup: function setup() {
       var _this = this;
       var audioChunks = [];
@@ -2385,26 +2393,16 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         _this.record.ondataavailable = function (e) {
           console.log("e:", e);
           audioChunks.push(e.data);
-          console.log("type: ", _typeof(e));
+          //console.log("type:", typeof(e))
           if (_this.record.state == "inactive") {
             console.log("завершенный файл", e.data);
-            //    let response = fetch('/convert', {
-            //     method: "post",
-            //     body: e
-            //    }).catch(function(e){
-            //     console.log("error: " + e);
-            //    });
-            //console.log("fetch was done");
-
-            axios({
-              method: "post",
-              url: "/convert",
-              data: {
-                data: e
+            var formData = new FormData();
+            formData.append("voice", e.data);
+            return axios__WEBPACK_IMPORTED_MODULE_0___default().post("/convert", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data"
               }
             });
-
-            //var blob = response.blob;
           }
         };
       })["catch"](function (e) {
