@@ -2349,19 +2349,33 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  // props: {
-  //     record: {type: MediaRecorder | null, default: null}
-  // },
-  // data: function(){
-  //     return {
-  //         record: this.record,
-  //     }
-  // },
+  data: function data() {
+    return {
+      text_input: null,
+      corrs: []
+    };
+  },
   methods: {
+    text_input_func: function text_input_func() {
+      this.text_input = this.corrs['text'];
+      console.log("text", this.text_input);
+      // if (this.corrs['text'] !== ""){
+      //     console.log("text", this.corrs['text']);
+      //     console.log("document value", document.getElementById('textfield'));
+      //     document.getElementById("textfield").value = this.corrs['text'];
+      // }
+    },
     startRecord: function startRecord() {
       console.log("Start operation");
       this.record.start();
@@ -2403,6 +2417,16 @@ __webpack_require__.r(__webpack_exports__);
               headers: {
                 "Content-Type": "multipart/form-data"
               }
+            }).then(function (response) {
+              console.log(response.data);
+              _this.corrs = response.data;
+              console.log("corrs text field:", _this.corrs['text']);
+              if (_this.corrs['text'] !== undefined) {
+                _this.text_input_func();
+              }
+              //console.log("len of obj 'corrs':", Object.keys(this.corrs).len);
+            })["catch"](function (err) {
+              console.log("Error:", err);
             });
           }
         };
@@ -55678,6 +55702,31 @@ var render = function () {
     _c("button", { on: { click: _vm.stopRecord } }, [
       _vm._v("Завершить запись"),
     ]),
+    _vm._v(" "),
+    _vm.corrs["text"] !== undefined
+      ? _c("div", [
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.text_input,
+                expression: "text_input",
+              },
+            ],
+            attrs: { id: "textfield" },
+            domProps: { value: _vm.text_input },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.text_input = $event.target.value
+              },
+            },
+          }),
+        ])
+      : _vm._e(),
   ])
 }
 var staticRenderFns = []

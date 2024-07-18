@@ -24,13 +24,25 @@ class ConvertController extends Controller
 
         $audio = $ffmpeg->open('audio_file.webm');
         $audio->save(new Wav(), 'export-wav.wav');
-        Log::info($audio->getPathfile());
+        Log::info("wav сформирован");
         
-        // отправка на яндекс cloud
+        // запуск скрипта на python
+        set_time_limit(0);
+        shell_exec("whisper export-wav.wav --language ru --model medium");
+
+        Log::info("текст переведен");
+
+        $json = file_get_contents('export-wav.json');
+        $json = json_decode($json, false);
+
+        Log::info($json->text);
+
+        return response()->json(['text' => $json->text]);
 
     }
 
     public function send(){
+        // не используется
         # IAM-token
         $token = "t1.9euelZqRjo_Ml8aem5DNncbHjp2Tme3rnpWak5HKnpSXnp2RzMqcx5XKlsfl8_cnPSFL-e9nRRVu_N3z92drHkv572dFFW78zef1656VmsqUkYyVkpiai5bKk46Nx8iJ7_zF656VmsqUkYyVkpiai5bKk46Nx8iJ.2jcwn8mOKaW9E6P2UXEA-l4AiPdIlLb1XIF_oDyvBJeugwgOBic5Q2ND0JZQPsdAYenLY-SbBdsVhkLijd7EBA"; 
 

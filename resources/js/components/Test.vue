@@ -1,9 +1,16 @@
+
+
 <template>
     <div class="container">
         <button @click="setup">Начать работу</button>
         <button @click="startRecord">Начать запись</button>
         <button @click="pauseRecord">Приостановить запись</button>
         <button @click="stopRecord">Завершить запись</button>
+
+        <div v-if="corrs['text'] !== undefined">
+           
+            <input v-model="text_input" id="textfield"></input>
+        </div>
     </div>
 </template>
 
@@ -12,16 +19,27 @@
 import axios from "axios";
 import Vue from "vue"
 
+
 export default {
-    // props: {
-    //     record: {type: MediaRecorder | null, default: null}
-    // },
-    // data: function(){
-    //     return {
-    //         record: this.record,
-    //     }
-    // },
+    data () {
+        return {
+            text_input:null,
+            corrs: []
+        }
+    },
     methods: {
+
+        text_input_func: function(){
+
+            this.text_input=this.corrs['text'];
+            console.log("text", this.text_input);
+            // if (this.corrs['text'] !== ""){
+            //     console.log("text", this.corrs['text']);
+            //     console.log("document value", document.getElementById('textfield'));
+            //     document.getElementById("textfield").value = this.corrs['text'];
+            // }
+        },
+
         startRecord: function(){
             console.log("Start operation");
             this.record.start();
@@ -66,6 +84,17 @@ export default {
                                 headers: {
                                     "Content-Type": "multipart/form-data",
                                 },
+                            }).then(response => {
+                                console.log(response.data);
+                                this.corrs = response.data;
+                                console.log("corrs text field:", this.corrs['text']);
+                                if (this.corrs['text'] !== undefined){
+                                    this.text_input_func();
+                                }
+                                //console.log("len of obj 'corrs':", Object.keys(this.corrs).len);
+
+                            }).catch(err => {
+                                console.log("Error:", err);
                             });
                         }
                     }
