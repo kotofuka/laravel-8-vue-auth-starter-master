@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use FFMpeg\FFMpeg;
+use FFMpeg\Format\Audio\Mp3;
 use FFMpeg\Format\Audio\Wav;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,21 +24,21 @@ class ConvertController extends Controller
         file_put_contents('audio_file.webm', $blob);
 
         $audio = $ffmpeg->open('audio_file.webm');
-        $audio->save(new Wav(), 'export-wav.wav');
-        Log::info("wav сформирован");
+        $audio->save(new Mp3(), 'export-mp3.mp3');
+        Log::info("mp3 сформирован");
         
         // запуск скрипта на python
         set_time_limit(0);
-        shell_exec("whisper export-wav.wav --language ru --model medium");
+        //shell_exec("whisper export-wav.wav --language ru --model medium");
+        file_put_contents("export-mp3.txt", "");
+        shell_exec('C:\Users\Pavel\Downloads\WhisperCMD\main.exe -gpu "AMD Radeon(TM) Graphics" --language ru -m C:\Users\Pavel\Downloads\WhisperCMD\ggml-medium.bin -f export-mp3.mp3 -otxt -nt');
 
         Log::info("текст переведен");
+        $text = file_get_contents('export-mp3.txt');
+        Log::info($text);
+        
 
-        $json = file_get_contents('export-wav.json');
-        $json = json_decode($json, false);
-
-        Log::info($json->text);
-
-        return response()->json(['text' => $json->text]);
+        return response()->json(['text' => $text]);
 
     }
 

@@ -6,6 +6,7 @@
         <button @click="startRecord">Начать запись</button>
         <button @click="pauseRecord">Приостановить запись</button>
         <button @click="stopRecord">Завершить запись</button>
+        <button @click="voiceStart">Начать работу с помощником</button>
 
         <div v-if="corrs['text'] !== undefined">
            
@@ -18,13 +19,15 @@
 
 import axios from "axios";
 import Vue from "vue"
+import Artyom from "artyom.js"
 
 
 export default {
     data () {
         return {
             text_input:null,
-            corrs: []
+            corrs: [],
+            Jar: new Artyom()
         }
     },
     methods: {
@@ -102,6 +105,42 @@ export default {
                 .catch(e=>console.log(e));
         
         },
+
+        voiceStart: function(){
+            this.Jar.on(["старт", "стоп", "закончить", "подготовиться"]).then((i) => {
+                switch (i){
+                    case 0:
+                        this.startRecord();
+                        break;
+                    
+                    case 1:
+                        this.pauseRecord();
+                        break;
+                    
+                    case 2:
+                        this.stopRecord();
+                        break;
+                    
+                    case 3:
+                        this.setup();
+                }
+            });
+            
+            this.Jar.initialize({
+                lang: "ru-Ru",
+                continuous: true,
+                soundex: true,
+                debug:true,
+                executionKeyWord: "приступим",
+                listen: true,
+                name: "Волга"
+            }).then(() => {
+                console.log("Jar has been succesfully inintialized");
+            }).catch((err) => {
+                console.log("Jar couldn't be initialized: ", err);
+            });
+            
+        }
     }
 }
 
